@@ -17,7 +17,7 @@ def get_pull_requests_data(owner, repo, token):
   return response.json()
 
 
-# Trim down the list of PRs to only have those that have been created in the last week
+# Filter the list of PRs to only have those that have been created in the last week
 # Returns a list of dictionaries
 def filter_prs_by_age(list_of_prs):
   filtered_list = []
@@ -32,18 +32,44 @@ def filter_prs_by_age(list_of_prs):
       filtered_list.append(pr)
   return filtered_list
 
+# Select only main attributes of the PR objects to generate an easy to read summary
+# Returns a list of dictionaries
+def get_pr_relevant_metadata(list_of_prs):
+  trimmed_down_list = []
+  for pr in list_of_prs:
+    pr_condensed = dict()
+    pr_condensed["title"] = pr["title"]
+    pr_condensed["state"] = pr["state"]
+    pr_condensed["created_at"] = pr["created_at"]
+    pr_condensed["html_url"] = pr["html_url"]
+    pr_condensed["is_draft"] = pr["draft"]
+    trimmed_down_list.append(pr_condensed)
+  return trimmed_down_list
+
+
+
 all_prs = get_pull_requests_data("opentofu", "opentofu", str(sys.argv[1]))
 desired_prs = filter_prs_by_age(all_prs)
+pr_extracted_metadata = get_pr_relevant_metadata(desired_prs)
+
+
+print("Summary of last week's PRs\n")
+for i in range(len(pr_extracted_metadata)):
+  title = pr_extracted_metadata[i]["title"]
+  state = pr_extracted_metadata[i]["state"]
+  # TODO: Add a human readable date
+  date = pr_extracted_metadata[i]["created_at"]
+  is_draft = pr_extracted_metadata[i]["is_draft"]
+  url = pr_extracted_metadata[i]["html_url"]
+  print(f"\n{i+1}. {title}")
+  print(f"PR status is: {state}")
+  print(f"PR was created at {date}")
+  print(f"PR is draft: {is_draft}")
+  print(f"Read more at: {url}")
 
 
 
 
-## Relevant properties
-# state, title, html_url
-# draft
-# created_at, 
-# updated_at, closed_at, merged_at no
-# body? no
 
 
 # example
