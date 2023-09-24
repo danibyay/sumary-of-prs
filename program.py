@@ -53,25 +53,32 @@ def get_human_date(date_string):
   datetime_object = parser.parse(date_string)
   return f"{datetime_object.month}/{datetime_object.day}"
 
-# TODO: Put this in the __main__ function
-## TODO: write a functino called print to console and another one to send email
-all_prs = get_pull_requests_data("opentofu", "opentofu", str(sys.argv[1]))
-desired_prs = filter_prs_by_age(all_prs)
-pr_extracted_metadata = get_pr_relevant_metadata(desired_prs)
+# Print the summary to the console
+# MVP before sending an email
+def print_summary_to_console(list_of_prs):
+  print("Summary of last week's PRs\n")
+  for i in range(len(list_of_prs)):
+    title = list_of_prs[i]["title"]
+    state = list_of_prs[i]["state"]
+    date = get_human_date(list_of_prs[i]["created_at"])
+    is_draft = list_of_prs[i]["is_draft"]
+    url = list_of_prs[i]["html_url"]
+    print(f"\n{i+1}. {title}")
+    print(f"PR status is: {state}")
+    print(f"PR was created on {date}")
+    print(f"PR is draft: {is_draft}")
+    print(f"Read more at: {url}")
+
+def main():
+  all_prs = get_pull_requests_data("opentofu", "opentofu", str(sys.argv[1]))
+  desired_prs = filter_prs_by_age(all_prs)
+  pr_extracted_metadata = get_pr_relevant_metadata(desired_prs)
+  print_summary_to_console(pr_extracted_metadata)
+
+if __name__ == "__main__":
+  main()
 
 
-print("Summary of last week's PRs\n")
-for i in range(len(pr_extracted_metadata)):
-  title = pr_extracted_metadata[i]["title"]
-  state = pr_extracted_metadata[i]["state"]
-  date = get_human_date(pr_extracted_metadata[i]["created_at"])
-  is_draft = pr_extracted_metadata[i]["is_draft"]
-  url = pr_extracted_metadata[i]["html_url"]
-  print(f"\n{i+1}. {title}")
-  print(f"PR status is: {state}")
-  print(f"PR was created on {date}")
-  print(f"PR is draft: {is_draft}")
-  print(f"Read more at: {url}")
 
 
 
