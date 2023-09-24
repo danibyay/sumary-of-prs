@@ -46,8 +46,15 @@ def get_pr_relevant_metadata(list_of_prs):
     trimmed_down_list.append(pr_condensed)
   return trimmed_down_list
 
+# From a json date string extract month/day format
+# example input: "2011-04-10T20:09:31Z"
+# example output: "04/10"
+def get_human_date(date_string):
+  datetime_object = parser.parse(date_string)
+  return f"{datetime_object.month}/{datetime_object.day}"
 
-
+# TODO: Put this in the __main__ function
+## TODO: write a functino called print to console and another one to send email
 all_prs = get_pull_requests_data("opentofu", "opentofu", str(sys.argv[1]))
 desired_prs = filter_prs_by_age(all_prs)
 pr_extracted_metadata = get_pr_relevant_metadata(desired_prs)
@@ -57,13 +64,12 @@ print("Summary of last week's PRs\n")
 for i in range(len(pr_extracted_metadata)):
   title = pr_extracted_metadata[i]["title"]
   state = pr_extracted_metadata[i]["state"]
-  # TODO: Add a human readable date
-  date = pr_extracted_metadata[i]["created_at"]
+  date = get_human_date(pr_extracted_metadata[i]["created_at"])
   is_draft = pr_extracted_metadata[i]["is_draft"]
   url = pr_extracted_metadata[i]["html_url"]
   print(f"\n{i+1}. {title}")
   print(f"PR status is: {state}")
-  print(f"PR was created at {date}")
+  print(f"PR was created on {date}")
   print(f"PR is draft: {is_draft}")
   print(f"Read more at: {url}")
 
