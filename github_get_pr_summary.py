@@ -2,19 +2,8 @@ import requests
 import json
 from datetime import datetime, timedelta
 from dateutil import parser, tz 
-import sys
 
 
-import base64
-from email.message import EmailMessage
-
-import os.path
-
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 
 # Use the github API to list all pull requests from a given repository
 # Returns a list of dictionaries, each pull request object is a dictionary
@@ -81,78 +70,17 @@ def build_summary_message(list_of_prs):
   return message
 
 
+# write the owner and repo as constants outside of the function
+
 # Call all the pull requests related functions to return the summary string
-def get_pr_summary():
-  all_prs = get_pull_requests_data("opentofu", "opentofu", str(sys.argv[1]))
+def get_pr_summary(github_pat):
+  all_prs = get_pull_requests_data("opentofu", "opentofu", github_pat)
   desired_prs = filter_prs_by_age(all_prs)
   pr_extracted_metadata = get_pr_relevant_metadata(desired_prs)
   message = build_summary_message(pr_extracted_metadata)
   return message
 
 
-# Authenticate to the gmail API using oauth2
-# returns credentials for future use
-def get_oauth_creds():
-  SCOPES = ['https://www.googleapis.com/auth/gmail.send']
-  creds = None
-  # The file token.json stores the user's access and refresh tokens, and is
-  # created automatically when the authorization flow completes for the first
-  # time.
-  if os.path.exists('token.json'):
-      creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-  # If there are no (valid) credentials available, let the user log in.
-  if not creds or not creds.valid:
-    if creds and creds.expired and creds.refresh_token:
-      creds.refresh(Request())
-    else:
-      flow = InstalledAppFlow.from_client_secrets_file(
-          'credentials.json', SCOPES)
-      creds = flow.run_local_server(port=0)
-    # Save the credentials for the next run
-    with open('token.json', 'w') as token:
-      token.write(creds.to_json())
-    
-  return creds
-
-
-# Create and send an email message
-# Print the returned  message id
-# Returns: Message object, including message id
-# use oauth creds
-  
-def gmail_send_message(dest_email, pr_summary_message):
-  try:
-    service = build('gmail', 'v1', credentials=get_oauth_creds())
-    message = EmailMessage()
-
-    message.set_content(pr_summary_message)
-
-    message['To'] = dest_email
-    message['From'] = 'madajiji@gmail.com'
-    message['Subject'] = 'This week\'s pull requests summary'
-
-    # encoded message
-    encoded_message = base64.urlsafe_b64encode(message.as_bytes()) \
-        .decode()
-
-    create_message = {
-        'raw': encoded_message
-    }
-    # pylint: disable=E1101
-    send_message = (service.users().messages().send
-                    (userId="me", body=create_message).execute())
-    print(F'Message Id: {send_message["id"]}')
-  except HttpError as error:
-    print(F'An error occurred: {error}')
-    send_message = None
-  return send_message
-
-
-if __name__ == "__main__":
-  gmail_send_message('danybecerr+testing@gmail.com', get_pr_summary())
-
-  # option to print to the console instead of send email
-  #print(get_pr_summary())
 
 
 

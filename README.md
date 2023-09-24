@@ -19,7 +19,7 @@ To run this program in the command line, provide as an argument the Personal acc
 
 > export GITHUB_PAT=XXXXXXX
 
-> python program.py $GITHUB_PAT
+> python main.py $GITHUB_PAT
 
 The token created should have the permissions to access public repositories: *public_repo* 
 
@@ -35,12 +35,17 @@ The output of this program can be displayed by printing on the console or by sen
 Send email option
 
         if __name__ == "__main__":
-            gmail_send_message('danybecerr+testing@gmail.com', get_pr_summary())
+            github_token = str(sys.argv[1])
+            email_dest = 'danybecerr+testing@gmail.com'
+            pr_summary_message = get_pr_summary(github_token)
+            gmail_send_message(email_dest, pr_summary_message)
 
 Print to the console option
 
         if __name__ == "__main__":
-            print(get_pr_summary())
+            github_token = str(sys.argv[1])
+            pr_summary_message = get_pr_summary(github_token)
+            print(pr_summary_message)
 
 Email that is sent:
 
