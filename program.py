@@ -80,11 +80,6 @@ def build_summary_message(list_of_prs):
     message += f"Read more at: {url}\n"
   return message
 
-# Print the summary to the console
-# MVP before sending an email
-def print_summary_to_console(list_of_prs):
-  print(build_summary_message(list_of_prs))
-
 
 # Call all the pull requests related functions to return the summary string
 def get_pr_summary():
@@ -94,9 +89,11 @@ def get_pr_summary():
   message = build_summary_message(pr_extracted_metadata)
   return message
 
-SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
+# Authenticate to the gmail API using oauth2
+# returns credentials for future use
 def get_oauth_creds():
+  SCOPES = ['https://www.googleapis.com/auth/gmail.send']
   creds = None
   # The file token.json stores the user's access and refresh tokens, and is
   # created automatically when the authorization flow completes for the first
@@ -118,19 +115,19 @@ def get_oauth_creds():
   return creds
 
 
-  # Create and send an email message
-  # Print the returned  message id
-  # Returns: Message object, including message id
-  # use oauth creds
+# Create and send an email message
+# Print the returned  message id
+# Returns: Message object, including message id
+# use oauth creds
   
-def gmail_send_message():
+def gmail_send_message(dest_email, pr_summary_message):
   try:
     service = build('gmail', 'v1', credentials=get_oauth_creds())
     message = EmailMessage()
 
-    message.set_content(get_pr_summary())
+    message.set_content(pr_summary_message)
 
-    message['To'] = 'danybecerr+testing@gmail.com'
+    message['To'] = dest_email
     message['From'] = 'madajiji@gmail.com'
     message['Subject'] = 'This week\'s pull requests summary'
 
@@ -151,10 +148,11 @@ def gmail_send_message():
   return send_message
 
 
-
-
 if __name__ == "__main__":
-  gmail_send_message()
+  gmail_send_message('danybecerr+testing@gmail.com', get_pr_summary())
+
+  # option to print to the console instead of send email
+  #print(get_pr_summary())
 
 
 
