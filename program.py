@@ -4,7 +4,8 @@ from datetime import datetime, timedelta
 from dateutil import parser, tz 
 import sys
 
-
+# Use the github API to list all pull requests from a given repository
+# Returns a list of dictionaries, each pull request object is a dictionary
 def get_pull_requests_data(owner, repo, token):
   api_url = f"https://api.github.com/repos/{owner}/{repo}/pulls"
   headers = {
@@ -16,22 +17,26 @@ def get_pull_requests_data(owner, repo, token):
   return response.json()
 
 
-response_j = get_pull_requests_data("opentofu", "opentofu", str(sys.argv[1]))
+# Trim down the list of PRs to only have those that have been created in the last week
+# Returns a list of dictionaries
+def filter_prs_by_age(list_of_prs):
+  filtered_list = []
+  # get a datetime object of the date of one week ago
+  now = datetime.now(tz=tz.tzlocal())
+  one_week_ago = now + timedelta(days=-7)
+  # evaluate each pr's created_at attribute
+  for pr in list_of_prs:
+    pr_date_string = pr["created_at"]
+    pr_datetime_object = parser.parse(pr_date_string)
+    if pr_datetime_object >= one_week_ago:
+      filtered_list.append(pr)
+  return filtered_list
 
-date_1 = response_j[1]["created_at"]
+all_prs = get_pull_requests_data("opentofu", "opentofu", str(sys.argv[1]))
+desired_prs = filter_prs_by_age(all_prs)
 
-print(f"raw date is {date_1}")
 
-date_object = parser.parse(date_1)
-print(f"parsed date is {date_object}")
-now = datetime.now(tz=tz.tzlocal())
-one_week_ago = now + timedelta(days=-7)
-print(f"one week ago was {one_week_ago}")
 
-if date_object >= one_week_ago:
-  print("the first PR is less than a week old")
-else:
-  print("the first PR is more then a week old") 
 
 ## Relevant properties
 # state, title, html_url
