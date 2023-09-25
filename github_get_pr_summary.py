@@ -3,8 +3,19 @@ import json
 from datetime import datetime, timedelta
 from dateutil import parser, tz 
 
-REPO_OWNER = "opentofu" #"opentofu"
-REPO_NAME = "opentofu"
+## TODO: Include the status on the first line (change format of message)
+## TODO: Validate that response or lists to iterate are not empty, if empty, print message and exit
+# or send email that there are no pr meeting the criteria
+
+test_set = [
+  ("jaytaph", "gosub-browser"), # 13 in the last week
+  ("opentofu", "opentofu"),     # 30 in the last week
+  ("geerlingguy", "ansible-for-devops") #only has one in the last week
+]
+test_instance = 1
+
+REPO_OWNER = test_set[test_instance][0]
+REPO_NAME = test_set[test_instance][1]
 
 # Use the github API to list all pull requests from a given repository
 # where state = {open, in draft, closed}
@@ -78,7 +89,7 @@ def build_summary_message(list_of_prs):
 
 # Call all the pull requests related functions to return the summary string
 def get_pr_summary(github_pat):
-  all_prs = get_pull_requests_data(REPO_OWNER, REPO_OWNER, github_pat)
+  all_prs = get_pull_requests_data(REPO_OWNER, REPO_NAME, github_pat)
   desired_prs = filter_prs_by_age(all_prs)
   pr_extracted_metadata = get_pr_relevant_metadata(desired_prs)
   message = build_summary_message(pr_extracted_metadata)
