@@ -5,7 +5,6 @@ from dateutil import parser, tz
 
 
 # TODO: error handling
-# TODO: paginate responses ? max is 30, what am I doing
 
 test_set = [
   ("jaytaph", "gosub-browser"), # 13 in the last week
@@ -13,9 +12,9 @@ test_set = [
   ("geerlingguy", "ansible-for-devops"), # only has one in the last week
   ("robertdebock", "ansible-role-cups"), # zero activity in the last week
   ("actions", "runner-images"), # 43 in the last week
-  ("torvalds", "linux")         # 0 
+  ("torvalds", "linux")         # zero activity in the last week
 ]
-test_instance = 4
+test_instance = 0
 
 REPO_OWNER = test_set[test_instance][0]
 REPO_NAME = test_set[test_instance][1]
@@ -31,8 +30,18 @@ def get_pull_requests_data(owner, repo, token, page="1"):
     "X-GitHub-Api-Version": "2022-11-28" 
   }
   params = {"state" : "all", "page": page}
-  response = requests.get(api_url, headers=headers, params=params)
-  return response.json()
+  try:
+    response = requests.get(api_url, headers=headers, params=params)
+    response.raise_for_status()
+    return response.json()
+  except requests.exceptions.ConnectionError:
+    print("A connection error occurred. Please check your internet connection.")
+  except requests.exceptions.Timeout:
+      print("The request timed out.")
+  except requests.exceptions.HTTPError as e:
+      print("HTTP Error:", e)
+  except requests.exceptions.RequestException as e:
+    print("An error with the Github API occurred", e)
 
 # Filter the list of PRs to only have those that have been created in the last week
 # Returns a list of dictionaries

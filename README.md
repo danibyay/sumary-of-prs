@@ -110,3 +110,5 @@ activate the venv
 7. [OpenTofu's Github Pull Requests](https://github.com/opentofu/opentofu/pulls)
 
 8. [Pagination in the REST API. Atlassian](https://developer.atlassian.com/server/confluence/pagination-in-the-rest-api/)
+
+9. [Exception handling of python requests module. Tutorialspoint](https://www.tutorialspoint.com/exception-handling-of-python-requests-module)
