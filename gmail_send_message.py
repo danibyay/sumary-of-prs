@@ -1,3 +1,8 @@
+# From Googleworkspace's Github
+# https://github.com/googleworkspace/python-samples/blob/main/gmail/snippet/send%20mail/create_draft.py
+# Copyright 2019 Google LLC
+# Licensed under the Apache License, Version 2.0 
+
 from oauth_quickstart import get_oauth_creds
 
 import base64
@@ -11,6 +16,12 @@ from googleapiclient.errors import HttpError
 # use oauth creds
   
 def gmail_send_message(dest_email, pr_summary_message):
+  """
+  Create and send an email message
+  Print the returned  message id
+  Returns: Message object, including message id
+  use oauth creds
+  """
   try:
     service = build('gmail', 'v1', credentials=get_oauth_creds())
     message = EmailMessage()

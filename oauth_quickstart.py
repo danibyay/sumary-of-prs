@@ -1,3 +1,7 @@
+# From Googleworkspace's Github
+# https://github.com/googleworkspace/python-samples/blob/main/gmail/quickstart/quickstart.py
+# Copyright 2018 Google LLC
+# Licensed under the Apache License, Version 2.0
 
 import os.path
 from google.auth.transport.requests import Request
@@ -7,9 +11,12 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
-# Authenticate to the gmail API using oauth2
-# returns credentials for future use
+
 def get_oauth_creds():
+  """
+  Authenticate to the gmail API using oauth2
+  returns credentials for future use
+  """
   
   creds = None
   # The file token.json stores the user's access and refresh tokens, and is
