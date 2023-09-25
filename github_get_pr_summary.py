@@ -10,9 +10,11 @@ from dateutil import parser, tz
 test_set = [
   ("jaytaph", "gosub-browser"), # 13 in the last week
   ("opentofu", "opentofu"),     # 30 in the last week
-  ("geerlingguy", "ansible-for-devops") #only has one in the last week
+  ("geerlingguy", "ansible-for-devops"), # only has one in the last week
+  ("robertdebock", "ansible-role-cups"), # zero activity in the last week
+  ("actions", "runner-images") # 30 in the last week
 ]
-test_instance = 1
+test_instance = 3
 
 REPO_OWNER = test_set[test_instance][0]
 REPO_NAME = test_set[test_instance][1]
@@ -70,20 +72,32 @@ def get_human_date(date_string):
   datetime_object = parser.parse(date_string)
   return f"{datetime_object.month}/{datetime_object.day}"
 
+# Merge the properties state and is_draft into one, for better readability in the summary
+# Returns string describing the state of the PR
+def get_simpler_status(state, is_draft):
+  status = ""
+  if is_draft:
+    status = "draft"
+  else:
+    # either open or closed
+    status = state
+  return status
+
 # Build a string of the summary to be printed or sent as email
 def build_summary_message(list_of_prs):
-  message = "Summary of last week's PRs\n"
-  for i in range(len(list_of_prs)):
-    title = list_of_prs[i]["title"]
-    state = list_of_prs[i]["state"]
-    date = get_human_date(list_of_prs[i]["created_at"])
-    is_draft = list_of_prs[i]["is_draft"]
-    url = list_of_prs[i]["html_url"]
-    message += f"\n{i+1}. {title}\n"
-    message += f"PR status is: {state}\n"
-    message += f"PR was created on {date}\n"
-    message += f"PR is draft: {is_draft}\n"
-    message += f"Read more at: {url}\n"
+  if len(list_of_prs) == 0:
+    message = "There are no pull requests to show"
+  else:
+    message = "Summary of last week's PRs\n"
+    for i in range(len(list_of_prs)):
+      title = list_of_prs[i]["title"]
+      status = get_simpler_status(list_of_prs[i]["state"], list_of_prs[i]["is_draft"])
+      date = get_human_date(list_of_prs[i]["created_at"])
+      url = list_of_prs[i]["html_url"]
+      message += f"\n{i+1}. {title}\n"
+      message += f"PR status is: {status}\n"
+      message += f"PR was created on {date}\n"
+      message += f"Read more at: {url}\n"
   return message
 
 
