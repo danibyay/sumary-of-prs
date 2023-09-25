@@ -3,18 +3,19 @@ import json
 from datetime import datetime, timedelta
 from dateutil import parser, tz 
 
-## TODO: Include the status on the first line (change format of message)
-## TODO: Validate that response or lists to iterate are not empty, if empty, print message and exit
-# or send email that there are no pr meeting the criteria
+
+# TODO: error handling
+# TODO: paginate responses ? max is 30, what am I doing
 
 test_set = [
   ("jaytaph", "gosub-browser"), # 13 in the last week
-  ("opentofu", "opentofu"),     # 30 in the last week
+  ("opentofu", "opentofu"),     # 57 in the last week
   ("geerlingguy", "ansible-for-devops"), # only has one in the last week
   ("robertdebock", "ansible-role-cups"), # zero activity in the last week
-  ("actions", "runner-images") # 30 in the last week
+  ("actions", "runner-images"), # 43 in the last week
+  ("torvalds", "linux")         # 0 
 ]
-test_instance = 3
+test_instance = 4
 
 REPO_OWNER = test_set[test_instance][0]
 REPO_NAME = test_set[test_instance][1]
@@ -22,14 +23,14 @@ REPO_NAME = test_set[test_instance][1]
 # Use the github API to list all pull requests from a given repository
 # where state = {open, in draft, closed}
 # Returns a list of dictionaries, each pull request object is a dictionary
-def get_pull_requests_data(owner, repo, token):
+def get_pull_requests_data(owner, repo, token, page="1"):
   api_url = f"https://api.github.com/repos/{owner}/{repo}/pulls"
   headers = {
     "Accept": "application/vnd.github+json", 
     "Authorization": f"Bearer {token}",
     "X-GitHub-Api-Version": "2022-11-28" 
   }
-  params = {"state" : "all"}
+  params = {"state" : "all", "page": page}
   response = requests.get(api_url, headers=headers, params=params)
   return response.json()
 
@@ -37,6 +38,8 @@ def get_pull_requests_data(owner, repo, token):
 # Returns a list of dictionaries
 def filter_prs_by_age(list_of_prs):
   filtered_list = []
+  if len(list_of_prs) == 0:
+    return filtered_list
   # get a datetime object of the date of one week ago
   now = datetime.now(tz=tz.tzlocal())
   one_week_ago = now + timedelta(days=-7)
@@ -103,10 +106,20 @@ def build_summary_message(list_of_prs):
 
 # Call all the pull requests related functions to return the summary string
 def get_pr_summary(github_pat):
-  all_prs = get_pull_requests_data(REPO_OWNER, REPO_NAME, github_pat)
-  desired_prs = filter_prs_by_age(all_prs)
-  pr_extracted_metadata = get_pr_relevant_metadata(desired_prs)
-  message = build_summary_message(pr_extracted_metadata)
+  recent_prs_found = True
+  big_list_of_prs = []
+  page = 1
+  while(recent_prs_found):
+    page_of_prs = get_pull_requests_data(REPO_OWNER, REPO_NAME, github_pat, str(page))
+    desired_date_prs = filter_prs_by_age(page_of_prs)
+    if len(desired_date_prs) > 0:
+      pr_extracted_metadata = get_pr_relevant_metadata(desired_date_prs)
+      big_list_of_prs += pr_extracted_metadata
+      page += 1
+    else:
+      recent_prs_found = False
+  # pass the whole list to this next step
+  message = build_summary_message(big_list_of_prs)
   return message
 
 

@@ -10,17 +10,13 @@ from email.message import EmailMessage
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-# Create and send an email message
-# Print the returned  message id
-# Returns: Message object, including message id
-# use oauth creds
   
 def gmail_send_message(dest_email, pr_summary_message):
   """
   Create and send an email message
   Print the returned  message id
+  Use oauth creds
   Returns: Message object, including message id
-  use oauth creds
   """
   try:
     service = build('gmail', 'v1', credentials=get_oauth_creds())
