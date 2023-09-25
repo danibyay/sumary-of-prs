@@ -7,10 +7,9 @@ The result can be either emailed using the Gmail API or printed to the console.
 Only a summary of the PRs will be displayed, as the most relevant metadata identified were:
 
 - Title
-- State
+- Status
 - Date created
 - URL
-- is_draft
 
 
 ### Getting started
