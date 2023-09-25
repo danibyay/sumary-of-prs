@@ -59,6 +59,13 @@ Github view of the PRs on opentofu's repository: (the source for this script)
 
 ![](img/github_prs.png)
         
+Another example of console output (with a different repo, and with an empty set of PRs):
+
+![](img/console_output_2.png)
+
+Another example of an email sent:
+
+![](img/email_demo_2.jpg)
 
 ### Other useful steps
 
