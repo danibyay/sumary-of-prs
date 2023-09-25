@@ -4,8 +4,6 @@ from datetime import datetime, timedelta
 from dateutil import parser, tz 
 
 
-# TODO: error handling
-
 test_set = [
   ("jaytaph", "gosub-browser"), # 13 in the last week
   ("opentofu", "opentofu"),     # 57 in the last week
@@ -113,11 +111,14 @@ def build_summary_message(list_of_prs):
   return message
 
 
-# Call all the pull requests related functions to return the summary string
+# Call all the pull requests related functions in a while loop to account for pagination
+# Github's API default page size = 30
+# Returns summary message string
 def get_pr_summary(github_pat):
   recent_prs_found = True
   big_list_of_prs = []
   page = 1
+  # Process the data page by page as long as we have relevant data (no more than a week old PRs)
   while(recent_prs_found):
     page_of_prs = get_pull_requests_data(REPO_OWNER, REPO_NAME, github_pat, str(page))
     desired_date_prs = filter_prs_by_age(page_of_prs)
